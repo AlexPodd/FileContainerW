@@ -1,4 +1,2 @@
-# SpringSecurity-6-Authorization-and-Authentication
-Simple example of Database authorization/authentication using SpringSecurity 6
-
-В репозитории хранится минимальный проект, который будет хорошим шаблоном для старта работы со SpringSecurity 6.
+Для запуска проекта необходимо настроить подключение к базе данный в application.properties
+Помимо этого необходимо изменить путь к хранилищу в классе StorageProperties
