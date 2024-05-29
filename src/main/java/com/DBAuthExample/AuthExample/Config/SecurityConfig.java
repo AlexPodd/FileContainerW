@@ -1,6 +1,7 @@
 package com.DBAuthExample.AuthExample.Config;
 
 
+import com.DBAuthExample.AuthExample.Services.MyUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -8,12 +9,14 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractAuthenticationFilterConfigurer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+
 
 @Configuration
 @EnableWebSecurity
@@ -23,6 +26,9 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService(){
         return new MyUserDetailsService();
     }
+
+
+
 
     @Bean
     public AuthenticationProvider authenticationProvider(){
@@ -34,16 +40,34 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return  http
+        http
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth.requestMatchers("test/welcome").permitAll() //вход без авторизации
-                        .requestMatchers("test/**").authenticated()) //с авторизацией и аутентификацией
-                .formLogin(AbstractAuthenticationFilterConfigurer::permitAll)
-                .build();
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/registration").permitAll() // Разрешить доступ к странице регистрации без аутентификации
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/").hasRole("USER")
+                        .requestMatchers("/downloadFile").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .x509(x509 -> x509
+                        .subjectPrincipalRegex("CN=(.*?)(?:,|$)")
+                        .userDetailsService(userDetailsService())
+                ) .exceptionHandling(exceptionHandling ->
+                        exceptionHandling
+                                .authenticationEntryPoint((request, response, authException) -> response.sendRedirect("/registration"))
+                );
+
+
+        return http.build();
     }
-    @Bean //Ставим степень кодировки, с которой кодировали пароль в базе
+    @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder(5);
     }
+    @Bean
+    public AuthenticationSuccessHandler authenticationSuccessHandler() {
+        return new SimpleUrlAuthenticationSuccessHandler("/");
+    }
+
 
 }

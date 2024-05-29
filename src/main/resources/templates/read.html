@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8">
+  <title>Редактирование текстовых документов</title>
+  <!-- Подключаем Quill из CDN -->
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+</head>
+<body>
+<textarea type="hidden" id="fileContent" style="display: none;" th:text="${fileContent}"></textarea>
+<input type="hidden" id="filePath" th:value="${filepath}">
+<input type="hidden" id="userID" th:value="${userID}">
+<div id="editor-container"></div>
+<script>
+  function loadDocumentContent() {
+    var filePath = document.getElementById("filePath").value;
+    var encodedFilePath = encodeURIComponent(filePath);
+    var Rule = 'read';
+    var userID = document.getElementById("userID").value;
+    var socket = new WebSocket("wss://localhost:8081/edit?Room=" + encodedFilePath + "&Rule=" + Rule + "&userID=" + userID);
+
+    // Получаем содержимое документа из скрытого поля
+    var fileContent = document.getElementById("fileContent").value;
+
+    // Создаем редактор Quill и устанавливаем содержимое
+    var quill = new Quill('#editor-container', {
+      modules: {
+        toolbar: false // Отключаем панель инструментов
+      },
+      theme: 'snow',
+      readOnly: true // Устанавливаем редактор в режим только для чтения
+    });
+    quill.setText(fileContent);
+    socket.onopen = function(event) {
+      console.log("WebSocket is open now.");
+    };
+
+    socket.onerror = function(error) {
+      console.error("WebSocket error observed:", error);
+    };
+
+    socket.onclose = function(event) {
+      alert('Сессия вебсокета закрыта. Подключение к серверу потеряно.');
+      window.location.href = '/';
+    };
+  }
+
+  // Вызываем функцию загрузки содержимого при загрузке страницы
+  window.onload = loadDocumentContent;
+</script>
+<!-- Подключаем Quill из CDN -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+
+</body>
+
+
+</html>

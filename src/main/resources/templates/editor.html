@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Текстовый Редактор</title>
+</head>
+<body>
+<textarea id="fileContent" rows="10" cols="50" th:text="${fileContent}"></textarea>
+<input type="hidden" id="filePath" th:value="${filepath}">
+<button onclick="saveFile()">Сохранить</button>
+<script>
+    function saveFile() {
+        var content = document.getElementById("fileContent").value;
+        var filePath = document.getElementById("filePath").value;
+
+        var data = {
+            content: content,
+            filePath: filePath
+        };
+
+        fetch('/save-file', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка сохранения файла');
+                }
+                alert('Файл успешно сохранен');
+                window.location.href = '/';
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Произошла ошибка при сохранении файла');
+            });
+    }
+</script>
+</body>
+</html>

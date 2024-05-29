@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Registration</title>
+    <style>
+        #progressBar {
+            width: 100%;
+            background-color: #f3f3f3;
+        }
+
+        #progressBarFill {
+            width: 0%;
+            height: 30px;
+            background-color: #4caf50;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+<div th:if="${errorMessage}" style="color: red;">
+    <p th:text="${errorMessage}"></p>
+</div>
+
+<h2>Registration Form</h2>
+<form id="registrationForm" th:action="@{/registration}" th:object="${user}" method="post">
+    <label for="name">Username:</label>
+    <input type="text" id="name" th:field="*{name}" /><br />
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" th:field="*{password}" /><br />
+
+    <!-- Hidden field to store generated random string -->
+    <input type="hidden" id="randomStringInput" name="randomString" />
+
+    <button type="submit" id="submitButton" disabled>Register</button>
+
+    <h1>Move your mouse to generate entropy</h1>
+
+    <div id="progressBar">
+        <div id="progressBarFill">0%</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
+    <script>
+        let entropyPool = [];
+
+        const maxPoolSize = 1024; // Increase pool size for more entropy
+        const progressBarFill = document.getElementById('progressBarFill');
+        const randomStringInput = document.getElementById('randomStringInput');
+        const submitButton = document.getElementById('submitButton');
+
+        document.addEventListener('mousemove', event => {
+            // Collect mouse coordinates and time
+            const x = event.clientX;
+            const y = event.clientY;
+            const time = new Date().getTime();
+
+            // Add to entropy pool
+            entropyPool.push({ x, y, time });
+
+            // Maintain pool size
+            if (entropyPool.length > maxPoolSize) {
+                entropyPool.shift();
+            }
+
+            // Update progress bar
+            const progress = (entropyPool.length / maxPoolSize) * 100;
+            progressBarFill.style.width = progress + '%';
+            progressBarFill.innerText = Math.floor(progress) + '%';
+
+            // Enable submit button if enough entropy is collected
+            if (entropyPool.length === maxPoolSize) {
+                randomStringInput.value = generateRandomString();
+                submitButton.removeAttribute('disabled');
+            }
+        });
+
+        function generateRandomString() {
+            let entropyString = '';
+            for (let i = 0; i < entropyPool.length; i++) {
+                const { x, y, time } = entropyPool[i];
+                entropyString += `${x}${y}${time}`;
+            }
+            let hash = sha256(entropyString);
+            let randomString = hash.substring(0, 256); // Take first 32 characters of hash
+            console.log("Сгенерированная случайная строка:", randomString);
+            return randomString;
+        }
+
+    </script>
+
+</form>
+</body>
+
+</html>

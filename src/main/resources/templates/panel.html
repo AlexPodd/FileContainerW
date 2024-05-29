@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Panel</title>
+</head>
+<body>
+<h1>User Panel</h1>
+<table>
+    <thead>
+    <tr>
+        <th>Username</th>
+        <th>Role</th>
+        <th>Access level</th>
+        <th>Action</th> <!-- Добавляем новую колонку для кнопок смены уровня доступа -->
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="user : ${users}">
+        <td th:text="${user.name}">Username</td>
+        <td th:text="${user.role}">Role</td>
+        <td th:text="${user.getMaxLvlAccess()}">MaxAccessLvl</td>
+        <td>
+            <form th:action="@{/admin/ChangeAccessLevel}" method="post"> <!-- Форма для отправки POST-запроса -->
+                <!-- Скрытое поле для передачи имени пользователя -->
+                <input type="hidden" name="username" th:value="${user.name}" />
+                <!-- Выпадающий список с выбором нового уровня доступа -->
+                <select name="newAccessLevel">
+                    <option value="1">Level 1</option>
+                    <option value="2">Level 2</option>
+                    <option value="3">Level 3</option>
+                </select>
+                <!-- Кнопка для отправки формы -->
+                <button type="submit">Change Access Level</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <title>File Management</title>
+    <style>
+        .file-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around; /* Распределение элементов по ширине */
+        }
+
+        .file-tile {
+            flex: 0 0 calc(30% - 20px); /* Определение ширины элемента */
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .file-tile {
+                flex: 0 0 calc(45% - 20px); /* Уменьшение ширины элементов на узких экранах */
+            }
+        }
+
+        @media (max-width: 576px) {
+            .file-tile {
+                flex: 0 0 calc(95% - 20px); /* Еще большее уменьшение ширины на очень узких экранах */
+            }
+        }
+    </style>
+</head>
+<body>
+<div th:if="${message}">
+    <h2 th:text="${message}"/>
+</div>
+
+<div>
+    <form method="POST" enctype="multipart/form-data" action="/">
+        <table>
+            <tr><td>File to upload:</td><td><input type="file" name="file" /></td></tr>
+            <tr>
+                <td>Access lvl:</td>
+                <td>
+                    <select name="LvlAccess">
+                        <option th:each="lvl : ${#numbers.sequence(1, accessLevel)}"
+                                th:value="${lvl}" th:text="${lvl}"></option>
+                    </select>
+                </td>
+            </tr>
+            <tr><td></td><td><input type="submit" value="Upload" /></td></tr>
+        </table>
+    </form>
+</div>
+
+<div class="file-container">
+    <div th:each="file : ${files}" class="file-tile">
+        <p th:text="${file}"></p>
+        <div>
+            <form method="GET" action="/editor">
+                <input type="hidden" name="filename" th:value="${file}" />
+                <button type="submit">Edit</button>
+            </form>
+            <form method="GET" action="/append">
+                <input type="hidden" name="filename" th:value="${file}" />
+                <button type="submit">Append</button>
+            </form>
+            <form method="GET" action="/read">
+                <input type="hidden" name="filename" th:value="${file}" />
+                <button type="submit">Read</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

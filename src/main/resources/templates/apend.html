@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Append Page</title>
+</head>
+<body>
+<h1>Append Text</h1>
+<form id="appendForm" method="POST" action="/append">
+    <input type="hidden" name="filename" th:value="${filename}" />
+    <textarea name="appendText" rows="4" cols="50"></textarea><br>
+    <button type="submit">Submit</button>
+</form>
+</body>
+</html>

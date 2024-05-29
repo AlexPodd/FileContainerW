@@ -1,4 +1,4 @@
-package com.DBAuthExample.AuthExample.Config;
+package com.DBAuthExample.AuthExample.Services;
 
 import com.DBAuthExample.AuthExample.Entity.User;
 import org.springframework.security.core.GrantedAuthority;
